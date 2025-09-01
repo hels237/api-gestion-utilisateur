@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: hels
       POSTGRES_PASSWORD: hels
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./base_de_donnees/gestion_utilisateur.sql:/docker-entrypoint-initdb.d/init.sql
