@@ -2,10 +2,10 @@ spring:
   application:
     name: gestion_utilisateur
   datasource:
-    url: jdbc:postgresql://localhost:5432/user_db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/user_db}
     driver-class-name: org.postgresql.Driver
-    username: hels
-    password: hels
+    username: ${SPRING_DATASOURCE_USERNAME:hels}
+    password: ${SPRING_DATASOURCE_PASSWORD:hels}
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,5 +30,14 @@ logging:
     org.springdoc: DEBUG
 
 jwt:
-  secret: Y7zQ5V0gP2wX4cH8aF1jB9kL7nM6oR3sT2uV1eZ0yW9xC8cD7fE6gH5iJ4kL3mN2oP1qR0sT9uV8wX7yZ6aB5cD4eF3gH2iJ1kL0mN9oP8qR7sT6uV5wX4yZ3aB2cD1eF0gH
-  expiration: 86400000
+  secret: ${JWT_SECRET:Y7zQ5V0gP2wX4cH8aF1jB9kL7nM6oR3sT2uV1eZ0yW9xC8cD7fE6gH5iJ4kL3mN2oP1qR0sT9uV8wX7yZ6aB5cD4eF3gH2iJ1kL0mN9oP8qR7sT6uV5wX4yZ3aB2cD1eF0gH}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized

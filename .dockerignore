@@ -1,0 +1,12 @@
+target/
+!target/gestion_utilisateur-*.jar
+.git
+.gitignore
+README.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+*.md
+.mvn/
+mvnw
+mvnw.cmd
