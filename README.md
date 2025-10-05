@@ -18,23 +18,32 @@ Avant de commencer, assurez-vous que vous avez installé les éléments suivants
 Cloner le projet depuis GitHub en utilisant la commande suivante :
 
 ```bash
-git clone git@github.com:belvip/User-Management-API.git
-cd ton-repository
+git clone https://github.com/hels237/api-gestion-utilisateur.git
+cd api-gestion-utilisateur
 ```
 # Guide de Configuration et d'Utilisation de l'API
 
 ## Étape 2 : Configurer la base de données
 Avant de démarrer l'API, configurez votre base de données en modifiant le fichier `application.properties` ou `application.yml` dans le dossier `src/main/resources`.
 
-### Exemple pour MySQL :
+### Exemple pour PostgreSQL :
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/user_db
-spring.datasource.username=hels
-spring.datasource.password=hels
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.ddl-auto=update
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_db
+    username: hels
+    password: hels
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8082
 ```
 
 ## Étape 3 : Construire et démarrer l'application
@@ -45,61 +54,61 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-Cela démarrera l'API sur le port par défaut `8082`. Vous pouvez le modifier dans le fichier `application.properties` :
+Cela démarrera l'API sur le port par défaut `8082`. Vous pouvez le modifier dans le fichier `application.yml` :
 
-```properties
-server.port=8082
+```yaml
+server:
+  port: 8082
 ```
 
 ## Étape 4 : Vérifier que l'API fonctionne
-Une fois l'API lancée, vous pouvez tester les points de terminaison (endpoints) en accédant à http://localhost:8083/swagger-ui.html (assurez-vous que Swagger est activé pour explorer l'API).
+Une fois l'API lancée, vous pouvez tester les points de terminaison (endpoints) en accédant à http://localhost:8082/swagger-ui.html (assurez-vous que Swagger est activé pour explorer l'API).
 
 ## Tester l'authentification
 
-### Étape 1 : S'inscrire en tant que nouvel utilisateur
+### Étape 1 : Créer un nouvel utilisateur
 
-Utilisez l'endpoint **POST /api/auth/register** pour créer un nouvel utilisateur avec les informations suivantes :
+Utilisez l'endpoint **POST /api/users** pour créer un nouvel utilisateur avec les informations suivantes :
 
 ```json
 {
-  "username": "user1",
+  "name": "user1",
   "email": "user1@example.com",
-  "password": "password1"
+  "password": "password1",
+  "roles": ["USER"]
 }
 ```
 ### Réponse attendue
 
-Si l'inscription est réussie, vous recevrez une réponse avec le message suivant :
+Si la création est réussie, vous recevrez une réponse avec les informations de l'utilisateur :
 
 ```json
 {
-  "message": "Utilisateur créé avec succès"
+  "id": 1,
+  "name": "user1",
+  "email": "user1@example.com",
+  "roles": ["USER"]
 }
 ```
 
 ### Étape 2 : Authentification de l'utilisateur
 
-Une fois inscrit, vous pouvez vous authentifier en envoyant une requête **POST /api/auth/login** avec les informations suivantes :
+Une fois créé, vous pouvez vous authentifier en envoyant une requête **POST /auth/login** avec les informations suivantes :
 
 ```json
 {
-  "username": "user1",
+  "email": "user1@example.com",
   "password": "password1"
 }
 ```
 
-### Étape 2 : Authentification de l'utilisateur
+### Réponse attendue
 
 Si l'authentification est réussie, vous recevrez un JWT Token dans la réponse :
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "type": "Bearer",
-  "id": 1,
-  "username": "user1",
-  "email": "user1@example.com",
-  "role": "USER"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 ### Étape 3 : Utiliser le token JWT pour l'accès aux endpoints protégés
@@ -114,8 +123,10 @@ Par exemple, pour mettre à jour le profil de l'utilisateur, envoyez une requêt
 
 ```json
 {
-  "username": "user1_updated",
-  "email": "user1_updated@example.com"
+  "name": "user1_updated",
+  "email": "user1_updated@example.com",
+  "password": "newpassword",
+  "roles": ["USER"]
 }
 ```
 
@@ -126,9 +137,9 @@ Si l'utilisateur est mis à jour avec succès, vous recevrez une réponse avec l
 ```json
 {
   "id": 1,
-  "username": "user1_updated",
+  "name": "user1_updated",
   "email": "user1_updated@example.com",
-  "roles": ["ROLE_USER"]
+  "roles": ["USER"]
 }
 ```
 
@@ -136,14 +147,15 @@ Si l'utilisateur est mis à jour avec succès, vous recevrez une réponse avec l
 
 ### Authentification
 
-- **POST /api/auth/register** : Inscription d'un nouvel utilisateur.
-- **POST /api/auth/login** : Authentification d'un utilisateur et obtention du token JWT.
+- **POST /auth/login** : Authentification d'un utilisateur et obtention du token JWT.
 
 ### Utilisateurs
 
+- **POST /api/users** : Créer un nouvel utilisateur.
+- **GET /api/users** : Obtenir la liste de tous les utilisateurs (ADMIN uniquement).
 - **GET /api/users/{id}** : Obtenir les informations d'un utilisateur par son ID.
-- **PUT /api/users/{id}** : Mettre à jour les informations d'un utilisateur.
-- **DELETE /api/users/{id}** : Supprimer un utilisateur.
+- **PUT /api/users/{id}** : Mettre à jour les informations d'un utilisateur (ADMIN uniquement).
+- **DELETE /api/users/{id}** : Supprimer un utilisateur (ADMIN uniquement).
 
 ## Sécurisation de l'API
 
